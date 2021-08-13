@@ -1,3 +1,9 @@
+const olPathInicial = document.querySelector('.cart__items');
+const localStorageUpdate = () => {
+  const olPath = document.querySelector('.cart__items');
+  localStorage.setItem('olInfo', olPath.innerHTML);
+};
+
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -29,14 +35,16 @@ function getSkuFromProductItem(item) {
 }
 
 function cartItemClickListener(event) {
-  event.target.remove();
+  event.target.remove('li');
+  localStorageUpdate();
 }
+
+olPathInicial.addEventListener('click', cartItemClickListener);
 
 function createCartItemElement({ id, title, price }) {
   const li = document.createElement('li');
   li.className = 'cart__item';
   li.innerText = `SKU: ${id} | NAME: ${title} | PRICE: $${price}`;
-  li.addEventListener('click', cartItemClickListener);
   return li;
 }
 // *-- 1 --*
@@ -59,10 +67,10 @@ function fetchApi(urlApi) {
 async function fetchId(event) {
   const buttonParent = event.target.parentElement;
   const parentId = getSkuFromProductItem(buttonParent);
-  const olPath = document.querySelector('.cart__items');
   return fetch(`https://api.mercadolibre.com/items/${parentId}`)
   .then((response) => response.json())
-  .then((jsonObj) => olPath.appendChild(createCartItemElement(jsonObj)));
+  .then((jsonObj) => olPathInicial.appendChild(createCartItemElement(jsonObj)))
+  .then(() => localStorageUpdate());
 }
 
 function addListener() {
@@ -76,7 +84,12 @@ async function createElement(promise) {
   resultado.forEach((item) => fatherElement.appendChild(createProductItemElement(item)));
   addListener();
 }
-  
+
+const getLocalStorage = () => {
+  olPathInicial.innerHTML += localStorage.getItem('olInfo');
+};
+
 window.onload = () => {
   createElement(fetchApi(url));
+  getLocalStorage();
 };
