@@ -1,4 +1,8 @@
 const olPathInicial = document.querySelector('.cart__items');
+const emptyCartButton = document.querySelector('.empty-cart');
+emptyCartButton.addEventListener('click', () => { 
+  olPathInicial.innerHTML = '';
+});
 const localStorageUpdate = () => {
   const olPath = document.querySelector('.cart__items');
   localStorage.setItem('olInfo', olPath.innerHTML);
