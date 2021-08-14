@@ -1,8 +1,8 @@
 const olPathInicial = document.querySelector('.cart__items');
+const h1Path = document.querySelector('.total-price');
+const h2Path = document.querySelector('.loading');
 const emptyCartButton = document.querySelector('.empty-cart');
-emptyCartButton.addEventListener('click', () => { 
-  olPathInicial.innerHTML = '';
-});
+
 const localStorageUpdate = () => {
   const olPath = document.querySelector('.cart__items');
   localStorage.setItem('olInfo', olPath.innerHTML);
@@ -42,13 +42,18 @@ const cartItems = [];
 const cartPrices = [];
 
 const createTitleTotalPrice = () => {
-  const h1Path = document.querySelector('.total-price');
-  let sumPrices = 0;
+  let sumPrices = null;
   cartPrices.forEach((price) => {
     sumPrices += price;
   });
   h1Path.innerText = sumPrices;
 };
+// *-- 6 --*
+const emptyCart = () => emptyCartButton.addEventListener('click', () => { 
+  olPathInicial.innerHTML = '';
+  h1Path.innerHTML = '';
+});
+emptyCart();
 //  *-- 3 --*
 function cartItemClickListener(event) {
   const innerTextLi = event.target.innerText;
@@ -87,6 +92,12 @@ function fetchApi(urlApi) {
   .then((json) => json.results.map((jsonObj) => arrayToObject(jsonObj, 'sku', 'name', 'image')));
 }
 // console.log(fetchApi(url));
+// *-- 7 --*
+function removeLoading() {
+  setTimeout(() => {
+    h2Path.parentElement.removeChild(h2Path);
+  }, 1000);
+}
 // *-- 2 --*
 async function fetchId(event) {
   const buttonParent = event.target.parentElement;
@@ -117,4 +128,5 @@ const getLocalStorage = () => {
 window.onload = () => {
   createElement(fetchApi(url));
   getLocalStorage();
+  removeLoading();
 };
