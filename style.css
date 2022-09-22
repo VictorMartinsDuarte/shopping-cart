@@ -55,3 +55,21 @@
   font-size: 16pt;
   text-align: center;
 }
+
+#price-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.total-price {
+  display: flex;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: red;
+  letter-spacing: 2px;
+}
+
+

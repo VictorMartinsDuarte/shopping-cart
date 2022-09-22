@@ -1,11 +1,16 @@
 const olPathInicial = document.querySelector('.cart__items');
-const h1Path = document.querySelector('.total-price');
-const h2Path = document.querySelector('.loading');
+const pricePath = document.querySelector('.total-price');
+const total = document.querySelector('.total');
+const h1Path = document.querySelector('.loading');
 const emptyCartButton = document.querySelector('.empty-cart');
 
 const localStorageUpdate = () => {
   const olPath = document.querySelector('.cart__items');
   localStorage.setItem('olInfo', olPath.innerHTML);
+  const totalText = document.querySelector('.total');
+  localStorage.setItem('totalText', totalText.innerText);
+  const spanPrice = document.querySelector('.total-price');
+  localStorage.setItem('priceInfo', spanPrice.innerText);
 };
 
 function createProductImageElement(imageSource) {
@@ -38,32 +43,43 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 // *-- 5 --*
-const cartItems = [];
-const cartPrices = [];
+let cartItems = [];
+let cartPrices = [];
 
 const createTitleTotalPrice = () => {
-  let sumPrices = null;
+  let sumPrices = 0;
   cartPrices.forEach((price) => {
     sumPrices += price;
+    sumPrices = Math.round(sumPrices * 100) / 100;
   });
-  h1Path.innerText = sumPrices;
+  total.innerText = 'Total: ';
+  pricePath.innerText = sumPrices;
+  localStorageUpdate();
 };
 // *-- 6 --*
 const emptyCart = () => emptyCartButton.addEventListener('click', () => { 
   olPathInicial.innerHTML = '';
-  h1Path.innerHTML = '';
+  pricePath.innerHTML = '';
+  cartItems = [];
+  cartPrices = [];
+  localStorageUpdate();
 });
 emptyCart();
 //  *-- 3 --*
 function cartItemClickListener(event) {
   const innerTextLi = event.target.innerText;
-  for (let index = 0; index < cartItems.length; index += 1) {
-    if (innerTextLi === cartItems[index]) {
-      cartPrices[index] = 0;
+  const priceIndex = cartItems.reduce((acc, cur, index) => {
+    let sameIndex = 0;
+    if (cur === innerTextLi) {
+      sameIndex = index;
     }
-  }
-  createTitleTotalPrice();
+    return sameIndex;
+  }, 0);
   event.target.remove('li');
+  cartItems.splice(priceIndex, 1);
+  cartPrices.splice(priceIndex, 1);
+  
+  createTitleTotalPrice();
   localStorageUpdate();
 }
 olPathInicial.addEventListener('click', cartItemClickListener);
@@ -73,7 +89,9 @@ function createCartItemElement({ id, title, price }) {
   li.className = 'cart__item';
   li.innerText = `SKU: ${id} | NAME: ${title} | PRICE: $${price}`;
   cartItems.push(li.innerText);
+  console.log(li.innerText);
   cartPrices.push(price);
+  console.log(price);
   return li;
 }
 // *-- 1 --*
@@ -92,12 +110,6 @@ function fetchApi(urlApi) {
   .then((json) => json.results.map((jsonObj) => arrayToObject(jsonObj, 'sku', 'name', 'image')));
 }
 // console.log(fetchApi(url));
-// *-- 7 --*
-function removeLoading() {
-  setTimeout(() => {
-    h2Path.parentElement.removeChild(h2Path);
-  }, 1000);
-}
 // *-- 2 --*
 async function fetchId(event) {
   const buttonParent = event.target.parentElement;
@@ -108,25 +120,32 @@ async function fetchId(event) {
   .then(() => localStorageUpdate())
   .then(() => createTitleTotalPrice());
 }
+// *-- 7 --*
+async function removeLoading() {
+  h1Path.parentElement.removeChild(h1Path);
+}
 
 function addListener() {
   const arrayButtons = document.querySelectorAll('.item__add');
   arrayButtons.forEach((button) => button.addEventListener('click', fetchId));
 }
-
 async function createElement(promise) {
   const resultado = await promise.then((result) => result);
   const fatherElement = document.querySelector('.items');
   resultado.forEach((item) => fatherElement.appendChild(createProductItemElement(item)));
   addListener();
+  removeLoading();
 }
 // *-- 4 --*
 const getLocalStorage = () => {
   olPathInicial.innerHTML += localStorage.getItem('olInfo');
+  const totalText = localStorage.getItem('totalText');
+  total.innerText += totalText === null ? '' : totalText;
+  const totalPrice = localStorage.getItem('priceInfo');
+  pricePath.innerText += totalPrice === null ? 0 : totalPrice;
 };
 
 window.onload = () => {
   createElement(fetchApi(url));
   getLocalStorage();
-  removeLoading();
 };
